@@ -68,7 +68,9 @@ describe('signTransactionWithLedger', () => {
 
 	it('maps a user rejection to a typed LedgerError', async () => {
 		const app = mockApp({
-			signTransaction: vi.fn().mockRejectedValue({ name: 'TransportStatusError', statusCode: 0x6985 })
+			signTransaction: vi
+				.fn()
+				.mockRejectedValue({ name: 'TransportStatusError', statusCode: 0x6985 })
 		});
 		const err = await signTransactionWithLedger(app, DEFAULT_ETH_PATH, '0xab').catch((e) => e);
 		expect(err).toBeInstanceOf(LedgerError);
