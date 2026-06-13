@@ -5,9 +5,12 @@ import {
 	fetchAllowedTask,
 	fetchAgentRecord,
 	loadAgentPolicy,
+	loadVendor,
 	ENS_TEXT_KEYS,
 	InvalidEnsBudgetError,
-	type EnsTextReader
+	VendorResolutionError,
+	type EnsTextReader,
+	type EnsResolver
 } from './ens';
 
 /**
@@ -173,6 +176,70 @@ describe('loadAgentPolicy', () => {
 
 		await expect(loadAgentPolicy(client, 'agent-01.user.eth')).rejects.toBeInstanceOf(
 			InvalidEnsBudgetError
+		);
+	});
+});
+
+const VENDOR_LOWER = '0x06b737d82849e00ed28aa999710ae3b72c1b7038';
+const VENDOR_CHECKSUMMED = '0x06B737D82849e00eD28aa999710ae3b72c1b7038';
+
+function mockResolver(opts: {
+	address: string | null;
+	records?: Record<string, string | null>;
+}): EnsResolver {
+	const records = opts.records ?? {};
+	return {
+		getEnsText: vi.fn(({ key }: { key: string }) => Promise.resolve(records[key] ?? null)),
+		getEnsAddress: vi.fn(() => Promise.resolve(opts.address))
+	};
+}
+
+describe('loadVendor', () => {
+	it('resolves payee (checksummed), price in wei, and service description', async () => {
+		const client = mockResolver({
+			address: VENDOR_LOWER,
+			records: { [ENS_TEXT_KEYS.PRICE]: '0.02', [ENS_TEXT_KEYS.SERVICE]: '2 nights, downtown' }
+		});
+
+		const vendor = await loadVendor(client, 'Hotel-NYC.vendors.eth');
+
+		expect(vendor).toEqual({
+			name: 'hotel-nyc.vendors.eth',
+			payee: VENDOR_CHECKSUMMED,
+			priceWei: parseEther('0.02'),
+			service: '2 nights, downtown'
+		});
+	});
+
+	it('leaves service undefined when the record is unset', async () => {
+		const client = mockResolver({ address: VENDOR_LOWER, records: { [ENS_TEXT_KEYS.PRICE]: '1' } });
+
+		const vendor = await loadVendor(client, 'hotel-nyc.vendors.eth');
+		expect(vendor.service).toBeUndefined();
+	});
+
+	it('throws VendorResolutionError when no payee address is set', async () => {
+		const client = mockResolver({ address: null, records: { [ENS_TEXT_KEYS.PRICE]: '1' } });
+
+		await expect(loadVendor(client, 'hotel-nyc.vendors.eth')).rejects.toBeInstanceOf(
+			VendorResolutionError
+		);
+	});
+
+	it('throws VendorResolutionError when the price record is missing', async () => {
+		const client = mockResolver({ address: VENDOR_LOWER });
+
+		await expect(loadVendor(client, 'hotel-nyc.vendors.eth')).rejects.toThrow(/price/i);
+	});
+
+	it('throws VendorResolutionError when the price is not a valid amount', async () => {
+		const client = mockResolver({
+			address: VENDOR_LOWER,
+			records: { [ENS_TEXT_KEYS.PRICE]: 'free' }
+		});
+
+		await expect(loadVendor(client, 'hotel-nyc.vendors.eth')).rejects.toBeInstanceOf(
+			VendorResolutionError
 		);
 	});
 });

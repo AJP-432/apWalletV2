@@ -15,13 +15,16 @@
  * See: docs/ens/ensip-26-agent-text-records.md, AGENTS.md
  */
 
-import { parseEther } from 'viem';
+import { getAddress, parseEther } from 'viem';
 import { normalize } from 'viem/ens';
 
 /** ENSIP-26 text-record keys this project reads. */
 export const ENS_TEXT_KEYS = {
 	MAX_BUDGET: 'max_budget',
-	ALLOWED_TASK: 'allowed_task'
+	ESCALATION_THRESHOLD: 'escalation_threshold',
+	ALLOWED_TASK: 'allowed_task',
+	PRICE: 'price',
+	SERVICE: 'service'
 } as const;
 
 /**
@@ -30,6 +33,25 @@ export const ENS_TEXT_KEYS = {
  */
 export interface EnsTextReader {
 	getEnsText(args: { name: string; key: string }): Promise<string | null>;
+}
+
+/** Extends {@link EnsTextReader} with forward address resolution (ENSIP-9). */
+export interface EnsResolver extends EnsTextReader {
+	getEnsAddress(args: { name: string }): Promise<string | null>;
+}
+
+/**
+ * Parse an ETH-denominated record into non-negative wei.
+ * @returns wei, or `null` if the value is not a valid non-negative amount.
+ */
+function parseNonNegativeEther(value: string): bigint | null {
+	let wei: bigint;
+	try {
+		wei = parseEther(value);
+	} catch {
+		return null;
+	}
+	return wei < 0n ? null : wei;
 }
 
 /** Thrown when a `max_budget` record exists but cannot be parsed as a valid budget. */
@@ -87,14 +109,8 @@ export async function fetchMaxBudget(client: EnsTextReader, name: string): Promi
 		return null;
 	}
 
-	let budgetWei: bigint;
-	try {
-		budgetWei = parseEther(value);
-	} catch {
-		throw new InvalidEnsBudgetError(name, value);
-	}
-
-	if (budgetWei < 0n) {
+	const budgetWei = parseNonNegativeEther(value);
+	if (budgetWei === null) {
 		throw new InvalidEnsBudgetError(name, value);
 	}
 
@@ -142,4 +158,64 @@ export async function loadAgentPolicy(client: EnsTextReader, name: string): Prom
 	]);
 
 	return { name: normalize(name), maxBudget, allowedTask };
+}
+
+/** Thrown when a vendor ENS name cannot be resolved into a payable target. */
+export class VendorResolutionError extends Error {
+	readonly name = 'VendorResolutionError';
+	readonly ensName: string;
+
+	constructor(ensName: string, reason: string) {
+		super(`Cannot resolve vendor "${ensName}": ${reason}.`);
+		this.ensName = ensName;
+	}
+}
+
+/**
+ * A procurement target resolved from a vendor ENS name. The agent pays
+ * `priceWei` to `payee`; both are read live from ENS, never hard-coded.
+ */
+export interface Vendor {
+	/** Normalized vendor ENS name. */
+	name: string;
+	/** Checksummed payout address (the vendor name's address record). */
+	payee: string;
+	/** Price the vendor charges, in wei (from the `price` text record). */
+	priceWei: bigint;
+	/** Optional human-readable description (from the `service` text record). */
+	service?: string;
+}
+
+/**
+ * Resolve a vendor ENS name into a payable {@link Vendor}: its address record
+ * (payee) plus its `price` and optional `service` text records.
+ *
+ * @throws {VendorResolutionError} when the payee or price is missing/invalid.
+ */
+export async function loadVendor(client: EnsResolver, name: string): Promise<Vendor> {
+	const normalized = normalize(name);
+	const [payee, priceRaw, service] = await Promise.all([
+		client.getEnsAddress({ name: normalized }),
+		fetchAgentRecord(client, normalized, ENS_TEXT_KEYS.PRICE),
+		fetchAgentRecord(client, normalized, ENS_TEXT_KEYS.SERVICE)
+	]);
+
+	if (!payee) {
+		throw new VendorResolutionError(name, 'no address record (payee) is set');
+	}
+	if (priceRaw === null) {
+		throw new VendorResolutionError(name, 'no price record is set');
+	}
+
+	const priceWei = parseNonNegativeEther(priceRaw);
+	if (priceWei === null) {
+		throw new VendorResolutionError(name, `price "${priceRaw}" is not a valid amount`);
+	}
+
+	return {
+		name: normalized,
+		payee: getAddress(payee),
+		priceWei,
+		service: service ?? undefined
+	};
 }
