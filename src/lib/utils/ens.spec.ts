@@ -4,6 +4,7 @@ import {
 	fetchMaxBudget,
 	fetchAllowedTask,
 	fetchAgentRecord,
+	loadAgentPolicy,
 	ENS_TEXT_KEYS,
 	InvalidEnsBudgetError,
 	type EnsTextReader
@@ -131,5 +132,45 @@ describe('fetchAllowedTask', () => {
 
 		await expect(fetchAllowedTask(client, 'agent-01.user.eth')).resolves.toBe('trading');
 		await expect(fetchMaxBudget(client, 'agent-01.user.eth')).resolves.toBe(parseEther('0.1'));
+	});
+});
+
+describe('loadAgentPolicy', () => {
+	it('aggregates both records into a typed policy with the normalized name', async () => {
+		const client = mockClientByKey({
+			[ENS_TEXT_KEYS.MAX_BUDGET]: '0.05',
+			[ENS_TEXT_KEYS.ALLOWED_TASK]: 'scraping'
+		});
+
+		const policy = await loadAgentPolicy(client, 'Agent-01.User.eth');
+
+		expect(policy).toEqual({
+			name: 'agent-01.user.eth',
+			maxBudget: parseEther('0.05'),
+			allowedTask: 'scraping'
+		});
+	});
+
+	it('returns null fields when records are unset (caller escalates)', async () => {
+		const client = mockClient(null);
+
+		const policy = await loadAgentPolicy(client, 'agent-01.user.eth');
+
+		expect(policy).toEqual({
+			name: 'agent-01.user.eth',
+			maxBudget: null,
+			allowedTask: null
+		});
+	});
+
+	it('propagates InvalidEnsBudgetError when the budget record is malformed', async () => {
+		const client = mockClientByKey({
+			[ENS_TEXT_KEYS.MAX_BUDGET]: 'banana',
+			[ENS_TEXT_KEYS.ALLOWED_TASK]: 'scraping'
+		});
+
+		await expect(loadAgentPolicy(client, 'agent-01.user.eth')).rejects.toBeInstanceOf(
+			InvalidEnsBudgetError
+		);
 	});
 });

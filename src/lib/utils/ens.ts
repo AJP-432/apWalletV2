@@ -111,3 +111,32 @@ export async function fetchMaxBudget(client: EnsTextReader, name: string): Promi
 export async function fetchAllowedTask(client: EnsTextReader, name: string): Promise<string | null> {
 	return fetchAgentRecord(client, name, ENS_TEXT_KEYS.ALLOWED_TASK);
 }
+
+/**
+ * An agent's operational policy, resolved entirely from its ENS text records.
+ * `null` fields mean the record is unset — the budget guard treats any null as
+ * "must escalate", never as "unrestricted".
+ */
+export interface AgentPolicy {
+	/** Normalized ENS name (ENSIP-15). */
+	name: string;
+	/** Spending cap in wei, or `null` if unset. */
+	maxBudget: bigint | null;
+	/** Permitted task category, or `null` if unset. */
+	allowedTask: string | null;
+}
+
+/**
+ * Resolve an agent's full {@link AgentPolicy} from its ENS name in a single,
+ * concurrent batch of text-record reads.
+ *
+ * @throws {InvalidEnsBudgetError} when the `max_budget` record is malformed.
+ */
+export async function loadAgentPolicy(client: EnsTextReader, name: string): Promise<AgentPolicy> {
+	const [maxBudget, allowedTask] = await Promise.all([
+		fetchMaxBudget(client, name),
+		fetchAllowedTask(client, name)
+	]);
+
+	return { name: normalize(name), maxBudget, allowedTask };
+}
