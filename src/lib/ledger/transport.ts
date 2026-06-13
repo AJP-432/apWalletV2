@@ -10,6 +10,7 @@
  * See: src/lib/ledger/signer.ts, docs/ledger/ledger-dmk-skills.md
  */
 
+import './polyfill'; // MUST be first: installs Buffer/global before Ledger libs load.
 import Eth from '@ledgerhq/hw-app-eth';
 import TransportWebUSB from '@ledgerhq/hw-transport-webusb';
 import { classifyLedgerError, LedgerError } from './errors';

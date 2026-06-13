@@ -4,6 +4,14 @@ import adapter from '@sveltejs/adapter-auto';
 import { sveltekit } from '@sveltejs/kit/vite';
 
 export default defineConfig({
+	// Ledger libs reference Node's `global`/`Buffer`; map `global` at build time
+	// (Buffer is polyfilled at runtime in src/lib/ledger/polyfill.ts).
+	define: {
+		global: 'globalThis'
+	},
+	optimizeDeps: {
+		include: ['buffer', '@ledgerhq/hw-app-eth', '@ledgerhq/hw-transport-webusb']
+	},
 	plugins: [
 		tailwindcss(),
 		sveltekit({
