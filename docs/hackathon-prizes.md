@@ -18,17 +18,18 @@ ENS is the identity layer for onchain AI agents: name them, resolve addresses,
 spin up subname registries for agent fleets, and store agent metadata in text
 records.
 
-| Prize | Pool | Notes |
-| ----- | ---- | ----- |
+| Prize                                 | Pool                      | Notes                                                                              |
+| ------------------------------------- | ------------------------- | ---------------------------------------------------------------------------------- |
 | 🤖 Best ENS Integration for AI Agents | $5,000 (2.5k / 1.5k / 1k) | **Our primary target.** ENS must obviously improve agent identity/discoverability. |
-| ✨ Most Creative Use of ENS | $5,000 (2.5k / 1.5k / 1k) | Records as access tokens, credentials, zk proofs, auto-rotating addresses. |
-| 🎉 Integrate ENS | $6,000 (split) | Any real ENS code (RainbowKit alone does not count). Must be open source. |
-| 🔄 Best ENS Continuity Integration | $4,000 (2.5k / 1.5k) | Continuity Track only — extend an existing product with ENS. |
+| ✨ Most Creative Use of ENS           | $5,000 (2.5k / 1.5k / 1k) | Records as access tokens, credentials, zk proofs, auto-rotating addresses.         |
+| 🎉 Integrate ENS                      | $6,000 (split)            | Any real ENS code (RainbowKit alone does not count). Must be open source.          |
+| 🔄 Best ENS Continuity Integration    | $4,000 (2.5k / 1.5k)      | Continuity Track only — extend an existing product with ENS.                       |
 
 **Hard requirements:** Demo must be functional with **no hard-coded values**.
 Submit a video or live demo link and present at the ENS booth Sunday morning.
 
 **Resources:**
+
 - AI Agent Registry ENS Name Verification — <https://docs.ens.domains/ensip/25/>
 - Agent Text Records — <https://docs.ens.domains/ensip/26/>
 - Agent-native CLI — <https://github.com/gskril/ens-cli>
@@ -36,8 +37,8 @@ Submit a video or live demo link and present at the ENS booth Sunday morning.
 
 ### Ledger — $10,000 total — <https://ledger.com>
 
-| Prize | Breakdown |
-| ----- | --------- |
+| Prize                 | Breakdown                                                                |
+| --------------------- | ------------------------------------------------------------------------ |
 | 🤖 AI Agents x Ledger | $10,000 — 1st $3,000 · 2nd $2,500 · 3rd $2,000 · 4th $1,500 · 5th $1,000 |
 
 **Description:** Build AI agents and AI-powered products that use Ledger as the

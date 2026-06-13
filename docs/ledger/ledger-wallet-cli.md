@@ -50,11 +50,11 @@ wallet-cli genuine-check
 The CLI supports **Bitcoin**, **Ethereum** (and EVM-compatible chains), and
 **Solana**.
 
-| Network | Balances & ops | Send / receive | Swap | Token lookup | Earn |
-| ------- | :------------: | :------------: | :--: | :----------: | :--: |
-| Bitcoin | ✓ | ✓ | ✓ | — | — |
-| Ethereum / EVM | ✓ | ✓ | ✓ | ERC-20 | coming soon |
-| Solana | ✓ | ✓ | ✓ | SPL | — |
+| Network        | Balances & ops | Send / receive | Swap | Token lookup |    Earn     |
+| -------------- | :------------: | :------------: | :--: | :----------: | :---------: |
+| Bitcoin        |       ✓        |       ✓        |  ✓   |      —       |      —      |
+| Ethereum / EVM |       ✓        |       ✓        |  ✓   |    ERC-20    | coming soon |
+| Solana         |       ✓        |       ✓        |  ✓   |     SPL      |      —      |
 
 ## Install
 
@@ -139,15 +139,15 @@ fees without touching the device.
 
 Network-specific flags:
 
-| Flag | Network |
-| ---- | ------- |
-| `--fee-per-byte` | Bitcoin only |
-| `--rbf` | Bitcoin only |
-| `--data` | Ethereum / EVM only (calldata) |
-| `--mode` | Solana only (`send`, `stake.createAccount`, `stake.delegate`, `stake.undelegate`, `stake.withdraw`) |
-| `--validator` | Solana staking only |
-| `--stake-account` | Solana staking only |
-| `--memo` | Solana only |
+| Flag              | Network                                                                                             |
+| ----------------- | --------------------------------------------------------------------------------------------------- |
+| `--fee-per-byte`  | Bitcoin only                                                                                        |
+| `--rbf`           | Bitcoin only                                                                                        |
+| `--data`          | Ethereum / EVM only (calldata)                                                                      |
+| `--mode`          | Solana only (`send`, `stake.createAccount`, `stake.delegate`, `stake.undelegate`, `stake.withdraw`) |
+| `--validator`     | Solana staking only                                                                                 |
+| `--stake-account` | Solana staking only                                                                                 |
+| `--memo`          | Solana only                                                                                         |
 
 ```bash
 # Receive — verify address on-device

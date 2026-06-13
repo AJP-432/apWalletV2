@@ -85,7 +85,9 @@ describe('fetchMaxBudget', () => {
 	it('surfaces the offending name and raw value on the error', async () => {
 		const client = mockClient('abc');
 
-		await expect(fetchMaxBudget(client, 'agent-01.user.eth')).rejects.toThrow(/agent-01\.user\.eth/);
+		await expect(fetchMaxBudget(client, 'agent-01.user.eth')).rejects.toThrow(
+			/agent-01\.user\.eth/
+		);
 		await expect(fetchMaxBudget(client, 'agent-01.user.eth')).rejects.toThrow(/abc/);
 	});
 });

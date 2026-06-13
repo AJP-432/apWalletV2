@@ -21,13 +21,13 @@ The system rests on two Web3 pillars:
 
 ## Tech stack
 
-| Layer | Choice |
-| ----- | ------ |
-| Framework | SvelteKit (TypeScript) |
-| Testing | Vitest |
-| Web3 | Viem (ENS resolution & text-record parsing) |
-| Hardware | `@ledgerhq/hw-app-eth` via WebUSB |
-| Styling | TailwindCSS |
+| Layer     | Choice                                      |
+| --------- | ------------------------------------------- |
+| Framework | SvelteKit (TypeScript)                      |
+| Testing   | Vitest                                      |
+| Web3      | Viem (ENS resolution & text-record parsing) |
+| Hardware  | `@ledgerhq/hw-app-eth` via WebUSB           |
+| Styling   | TailwindCSS                                 |
 
 ## Project structure
 

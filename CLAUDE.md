@@ -8,7 +8,7 @@ Claude Code: the canonical engineering instructions for this repository live in
 ## Claude-specific reminders
 
 - Follow the **Verify Before Committing Loop** in `AGENTS.md` §2.C: write the
-  test, run `npm run test:unit -- --run <file>`, confirm it passes, *then*
+  test, run `npm run test:unit -- --run <file>`, confirm it passes, _then_
   propose an atomic conventional commit.
 - One logical change per commit. Do not batch unrelated edits.
 - Define TypeScript types first, tests second, implementation third

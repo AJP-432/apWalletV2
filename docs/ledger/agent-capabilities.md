@@ -22,10 +22,10 @@ encryption and authentication.
 The two tools answer different questions. Pick the row that matches what you
 want to do; you do not need both.
 
-| If you want to... | Use | Timing | Audience |
-| ----------------- | --- | ------ | -------- |
-| Manage your own Ledger accounts from a terminal or agent | [Ledger Wallet CLI](./ledger-wallet-cli.md) | runtime | end users / power users |
-| Add Ledger support to an app you are building | [DMK skills](./ledger-dmk-skills.md) | build time | application developers |
+| If you want to...                                        | Use                                         | Timing     | Audience                |
+| -------------------------------------------------------- | ------------------------------------------- | ---------- | ----------------------- |
+| Manage your own Ledger accounts from a terminal or agent | [Ledger Wallet CLI](./ledger-wallet-cli.md) | runtime    | end users / power users |
+| Add Ledger support to an app you are building            | [DMK skills](./ledger-dmk-skills.md)        | build time | application developers  |
 
 - **Ledger Wallet CLI (runtime):** Install the CLI, plug in your Ledger, and run
   discover, balances, send, receive, swap, and staking. Drive these commands
@@ -64,10 +64,10 @@ your device is plugged in. Hardware confirmation is required for every signing
 step.
 
 - **Portfolio snapshot (read-only):** `"Show my ETH balance and last 10
-  transactions."` The agent calls balances and operations without touching the
+transactions."` The agent calls balances and operations without touching the
   device. Useful for dashboards, briefings, and health checks.
 - **Agent-assisted send (signing):** `"Send 100 USDT to 0xDEF… — confirm on my
-  Ledger."` The agent plans the transaction, calls `send --dry-run` to preview
+Ledger."` The agent plans the transaction, calls `send --dry-run` to preview
   fees, then triggers hardware signing after your approval.
 - **Natural-language swap (swap · v2):** `"Swap 0.1 ETH to BTC at best rate."`
   The agent fetches a quote, surfaces rate and fees in plain English, then Clear
@@ -79,11 +79,11 @@ Things your coding agent can help you build once the DMK skills are installed in
 your skills directory.
 
 - **Add Ledger to a wallet app (build):** `"Add WebHID-based Ethereum signing to
-  my Vite + React wallet."` The agent uses the implementation skill to wire
+my Vite + React wallet."` The agent uses the implementation skill to wire
   transports, sessions, and clear-sign payloads, and surfaces user-rejection
   errors correctly.
 - **Add HITL approval to an agent workflow (build):** `"Pause my trading bot and
-  require Ledger confirmation before any send."` The agent uses the 5-step
+require Ledger confirmation before any send."` The agent uses the 5-step
   execution process to insert a hardware approval gate at sensitive steps in
   your own application.
 

@@ -25,7 +25,7 @@ authoritative engineering workflow lives in [`../AGENTS.md`](../AGENTS.md).
 
 ## How this project maps to the docs
 
-| Pillar | Doc | Where it shows up in code |
-| ------ | --- | ------------------------- |
-| ENS identity & metadata | ENSIP-25 / ENSIP-26 | `src/lib/utils/ens.ts` reads `max_budget` and other text records via Viem. |
-| Hardware escalation | Ledger agent capabilities / DMK / Wallet CLI | Agent state machine transitions into `AWAITING_LEDGER_SIGNATURE`; signing is gated on-device. |
+| Pillar                  | Doc                                          | Where it shows up in code                                                                     |
+| ----------------------- | -------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| ENS identity & metadata | ENSIP-25 / ENSIP-26                          | `src/lib/utils/ens.ts` reads `max_budget` and other text records via Viem.                    |
+| Hardware escalation     | Ledger agent capabilities / DMK / Wallet CLI | Agent state machine transitions into `AWAITING_LEDGER_SIGNATURE`; signing is gated on-device. |

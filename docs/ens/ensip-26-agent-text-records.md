@@ -21,10 +21,10 @@ runtime.
 
 ## Text record keys used by this project
 
-| Key | Meaning | Example value | Parsed type |
-| --- | ------- | ------------- | ----------- |
-| `max_budget` | Maximum spend an agent may authorize autonomously before it must escalate to a Ledger signature. | `0.05` (denominated in ETH) | `bigint` / `number` |
-| `allowed_task` | The task category the agent is permitted to perform. | `scraping` | `string` |
+| Key            | Meaning                                                                                          | Example value               | Parsed type         |
+| -------------- | ------------------------------------------------------------------------------------------------ | --------------------------- | ------------------- |
+| `max_budget`   | Maximum spend an agent may authorize autonomously before it must escalate to a Ledger signature. | `0.05` (denominated in ETH) | `bigint` / `number` |
+| `allowed_task` | The task category the agent is permitted to perform.                                             | `scraping`                  | `string`            |
 
 > These keys follow the ENSIP-26 "agent text record" convention. The exact key
 > namespace may be prefixed (e.g. `agent:max_budget`) as the spec finalizes;
@@ -44,8 +44,8 @@ import { mainnet } from 'viem/chains';
 const client = createPublicClient({ chain: mainnet, transport: http() });
 
 const maxBudget = await client.getEnsText({
-  name: 'agent-01.user.eth',
-  key: 'max_budget',
+	name: 'agent-01.user.eth',
+	key: 'max_budget'
 });
 ```
 

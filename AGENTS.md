@@ -83,13 +83,13 @@ When a new coding task is requested:
 
 ## 5. Repository Map
 
-| Path                         | Purpose                                                       |
-| ---------------------------- | ------------------------------------------------------------- |
-| `src/lib/agent/`             | Agent state machine: types + pure transition logic.           |
-| `src/lib/utils/ens.ts`       | Viem-based ENS text-record readers (`max_budget`, etc.).      |
-| `src/lib/**/*.spec.ts`       | Co-located Vitest unit tests (TDD).                           |
-| `docs/`                      | North-star reference docs (Ledger, ENS, hackathon prizes).   |
-| `AGENTS.md`                  | Canonical engineering instructions (this file).              |
+| Path                   | Purpose                                                    |
+| ---------------------- | ---------------------------------------------------------- |
+| `src/lib/agent/`       | Agent state machine: types + pure transition logic.        |
+| `src/lib/utils/ens.ts` | Viem-based ENS text-record readers (`max_budget`, etc.).   |
+| `src/lib/**/*.spec.ts` | Co-located Vitest unit tests (TDD).                        |
+| `docs/`                | North-star reference docs (Ledger, ENS, hackathon prizes). |
+| `AGENTS.md`            | Canonical engineering instructions (this file).            |
 
 ## 6. Common Commands
 
@@ -107,6 +107,6 @@ npm run format            # prettier --write
 - **No hard-coded values** in anything that touches ENS resolution — judges
   explicitly disqualify hard-coded demos. Read from text records at runtime.
 - **Never** remove or bypass the Ledger on-device confirmation gate. Agents
-  *propose*; the human *verifies* on hardware.
+  _propose_; the human _verifies_ on hardware.
 - Keep the execution engine and UI dashboard out of scope until Phase 1
   (scaffold + tested utilities + docs) is complete and committed.

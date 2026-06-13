@@ -108,7 +108,10 @@ export async function fetchMaxBudget(client: EnsTextReader, name: string): Promi
  * @returns The trimmed task category, or `null` when unset (caller MUST treat
  *          an unset task as "escalate", never as "any task allowed").
  */
-export async function fetchAllowedTask(client: EnsTextReader, name: string): Promise<string | null> {
+export async function fetchAllowedTask(
+	client: EnsTextReader,
+	name: string
+): Promise<string | null> {
 	return fetchAgentRecord(client, name, ENS_TEXT_KEYS.ALLOWED_TASK);
 }
 

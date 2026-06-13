@@ -49,7 +49,12 @@ describe('agent state machine — recovery and errors', () => {
 	});
 
 	it('can ERROR into HALTED from any active state', () => {
-		const activeStates: AgentState[] = ['SCRAPING', 'EVALUATING', 'AWAITING_LEDGER_SIGNATURE', 'EXECUTING'];
+		const activeStates: AgentState[] = [
+			'SCRAPING',
+			'EVALUATING',
+			'AWAITING_LEDGER_SIGNATURE',
+			'EXECUTING'
+		];
 		for (const state of activeStates) {
 			expect(transition(state, 'ERROR')).toBe('HALTED');
 		}
