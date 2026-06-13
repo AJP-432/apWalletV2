@@ -57,7 +57,8 @@ export function decideFunding(
 		return escalate('no-budget', 0n);
 	}
 
-	const remainingPool = policy.maxBudget > spentFromPoolWei ? policy.maxBudget - spentFromPoolWei : 0n;
+	const remainingPool =
+		policy.maxBudget > spentFromPoolWei ? policy.maxBudget - spentFromPoolWei : 0n;
 
 	if (action.costWei < 0n) {
 		return escalate('invalid-cost', remainingPool);

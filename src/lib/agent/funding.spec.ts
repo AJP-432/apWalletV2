@@ -31,7 +31,11 @@ describe('decideFunding — pool-funded', () => {
 	});
 
 	it('with no escalation_threshold set, only the pool cap gates', () => {
-		const d = decideFunding(policy({ escalationThreshold: null }), action({ costWei: parseEther('0.9') }), 0n);
+		const d = decideFunding(
+			policy({ escalationThreshold: null }),
+			action({ costWei: parseEther('0.9') }),
+			0n
+		);
 		expect(d.source).toBe('POOL');
 	});
 
@@ -44,7 +48,11 @@ describe('decideFunding — pool-funded', () => {
 describe('decideFunding — escalates to Ledger', () => {
 	it('escalates when a single action exceeds the per-action threshold', () => {
 		const d = decideFunding(policy(), action({ costWei: parseEther('0.1') + 1n }), 0n);
-		expect(d).toMatchObject({ source: 'ESCALATE', event: 'EXCEEDS_BUDGET', reason: 'over-threshold' });
+		expect(d).toMatchObject({
+			source: 'ESCALATE',
+			event: 'EXCEEDS_BUDGET',
+			reason: 'over-threshold'
+		});
 	});
 
 	it('escalates when the action would overspend the remaining pool', () => {
