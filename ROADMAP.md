@@ -82,19 +82,42 @@ npm install @ledgerhq/hw-app-eth @ledgerhq/hw-transport-webusb
 
 ---
 
-## Phase 4 — Agent runtime ⬜
+## Phase 4 — Agent runtime (agentic procurement) 🔜
 
-Goal: a loop that actually drives the state machine for a (simulated) task.
+Goal: a prompt → editable workflow graph → executor that funds each node from a
+pre-approved pool or escalates to Ledger.
 
-**Features**
+**Locked decisions**
 
-- ⬜ `src/lib/agent/runtime.ts`: holds current `AgentState`, applies events, logs transitions
-- ⬜ Pluggable "task executor" interface (Phase-4 uses a mock/simulated low-value task)
-- ⬜ Cost estimator for proposed actions (Viem `estimateGas` / fee data)
-- ⬜ Optional: LLM "brain" that proposes actions (see LLM API key below)
-- ⬜ Event/audit log persisted per agent
+- **Scenario:** agentic procurement. Vendors are ENS names (`hotel-nyc.vendors.eth`)
+  whose address record = payee and `price` text record = cost. Resolved at
+  runtime (no hard-coded values).
+- **Pool:** an operator wallet funded once via a Ledger-signed transfer; cap =
+  ENS `max_budget`. Small nodes auto-pay from the pool; nodes over
+  `escalation_threshold` (or that would overspend the pool) are paid from the
+  Ledger account with on-device confirmation. Production path: ERC-4337 session
+  keys (noted, not built this weekend).
+- **Planner:** Gemini with a strict JSON schema (structured output) + a
+  deterministic fallback template so the live demo never breaks.
+- **Chain/asset:** Sepolia ETH.
 
-**Keys:** Ethereum RPC (required), LLM API key (optional, for autonomous reasoning).
+**Stage A — pure domain core (no keys/hardware/network, all mock-tested)**
+
+- 🔜 `loadVendor()` in `ens.ts`: resolve vendor payee (address record) + `price`
+- 🔜 Extend `AgentPolicy`: `allowed_task` as a list + `escalation_threshold`
+- 🔜 `src/lib/agent/funding.ts`: pool-vs-escalate decision with pool accounting
+- 🔜 `src/lib/agent/workflow.ts`: graph types + validation + topological order
+
+**Stage B — integrations (uses Gemini key + Sepolia + Ledger)**
+
+- ⬜ `src/lib/planner/`: Gemini structured-output planner + fallback template
+- ⬜ Cost binding: resolve each node's vendor price into the graph
+- ⬜ `src/lib/agent/executor.ts`: walk the DAG, run the state machine per node,
+  pay from the operator wallet (Viem) or escalate via `confirmOnLedger`
+- ⬜ Operator-wallet funding flow (one Ledger-signed top-up) + pool tracking
+- ⬜ Per-run audit log of transitions and payments
+
+**Keys:** Sepolia RPC (required), `LLM_API_KEY` (Gemini, required for planner).
 
 ---
 

@@ -21,10 +21,28 @@ runtime.
 
 ## Text record keys used by this project
 
-| Key            | Meaning                                                                                          | Example value               | Parsed type         |
-| -------------- | ------------------------------------------------------------------------------------------------ | --------------------------- | ------------------- |
-| `max_budget`   | Maximum spend an agent may authorize autonomously before it must escalate to a Ledger signature. | `0.05` (denominated in ETH) | `bigint` / `number` |
-| `allowed_task` | The task category the agent is permitted to perform.                                             | `scraping`                  | `string`            |
+### On the agent name (e.g. `agent-01.user.eth`)
+
+| Key                    | Meaning                                                                                             | Example value            | Parsed type    |
+| ---------------------- | --------------------------------------------------------------------------------------------------- | ------------------------ | -------------- |
+| `max_budget`           | Total spending pool the agent may authorize autonomously across a whole workflow before escalating. | `0.05` (ETH)             | `bigint` (wei) |
+| `escalation_threshold` | Per-action ceiling: any single action costing more than this must escalate to a Ledger signature.   | `0.01` (ETH)             | `bigint` (wei) |
+| `allowed_task`         | Comma-separated list of task categories the agent may perform autonomously.                         | `book_hotel,book_flight` | `string[]`     |
+
+The pool model (operator wallet, cap = `max_budget`) and the per-action gate
+(`escalation_threshold`) together decide pool-funded vs. hardware-escalated; see
+`src/lib/agent/funding.ts`.
+
+### On a vendor name (e.g. `hotel-nyc.vendors.eth`)
+
+Each procurement target is itself an ENS name. The agent resolves the vendor at
+runtime — no hard-coded addresses or prices.
+
+| Source                   | Meaning                                          | Example value        | Parsed type    |
+| ------------------------ | ------------------------------------------------ | -------------------- | -------------- |
+| address record (ENSIP-9) | The payout address to send funds to.             | `0x06B7…7038`        | `Address`      |
+| `price` text record      | The price the vendor charges, in ETH.            | `0.02`               | `bigint` (wei) |
+| `service` text record    | Human-readable description of what is purchased. | `2 nights, downtown` | `string`       |
 
 > These keys follow the ENSIP-26 "agent text record" convention. The exact key
 > namespace may be prefixed (e.g. `agent:max_budget`) as the spec finalizes;
