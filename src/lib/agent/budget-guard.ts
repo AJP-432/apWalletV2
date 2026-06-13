@@ -26,9 +26,10 @@ export interface ProposedAction {
 /** The subset of agent events this guard can emit. */
 export type BudgetDecision = Extract<AgentEvent, 'WITHIN_BUDGET' | 'EXCEEDS_BUDGET'>;
 
-/** Case-insensitive, whitespace-insensitive task comparison. */
-function tasksMatch(allowed: string, requested: string): boolean {
-	return allowed.trim().toLowerCase() === requested.trim().toLowerCase();
+/** True when `requested` is one of the policy's allowed task categories. */
+export function isTaskAllowed(allowedTasks: string[], requested: string): boolean {
+	const normalized = requested.trim().toLowerCase();
+	return allowedTasks.includes(normalized);
 }
 
 /**
@@ -40,8 +41,7 @@ function tasksMatch(allowed: string, requested: string): boolean {
 export function evaluateAction(policy: AgentPolicy, action: ProposedAction): BudgetDecision {
 	const autonomous =
 		policy.maxBudget !== null &&
-		policy.allowedTask !== null &&
-		tasksMatch(policy.allowedTask, action.taskType) &&
+		isTaskAllowed(policy.allowedTasks, action.taskType) &&
 		action.costWei >= 0n &&
 		action.costWei <= policy.maxBudget;
 

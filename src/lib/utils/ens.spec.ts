@@ -3,11 +3,12 @@ import { parseEther } from 'viem';
 import {
 	fetchMaxBudget,
 	fetchAllowedTask,
+	fetchAllowedTasks,
 	fetchAgentRecord,
 	loadAgentPolicy,
 	loadVendor,
 	ENS_TEXT_KEYS,
-	InvalidEnsBudgetError,
+	InvalidEnsAmountError,
 	VendorResolutionError,
 	type EnsTextReader,
 	type EnsResolver
@@ -63,19 +64,19 @@ describe('fetchMaxBudget', () => {
 		await expect(fetchMaxBudget(client, 'agent-01.user.eth')).resolves.toBeNull();
 	});
 
-	it('throws InvalidEnsBudgetError for a non-numeric record', async () => {
+	it('throws InvalidEnsAmountError for a non-numeric record', async () => {
 		const client = mockClient('not-a-number');
 
 		await expect(fetchMaxBudget(client, 'agent-01.user.eth')).rejects.toBeInstanceOf(
-			InvalidEnsBudgetError
+			InvalidEnsAmountError
 		);
 	});
 
-	it('throws InvalidEnsBudgetError for a negative budget', async () => {
+	it('throws InvalidEnsAmountError for a negative budget', async () => {
 		const client = mockClient('-0.5');
 
 		await expect(fetchMaxBudget(client, 'agent-01.user.eth')).rejects.toBeInstanceOf(
-			InvalidEnsBudgetError
+			InvalidEnsAmountError
 		);
 	});
 
@@ -129,6 +130,21 @@ describe('fetchAllowedTask', () => {
 		await expect(fetchAllowedTask(mockClient(null), 'agent-01.user.eth')).resolves.toBeNull();
 	});
 
+	describe('fetchAllowedTasks (parsed list)', () => {
+		it('parses a comma list: trims, lower-cases, de-dupes, drops empties', async () => {
+			const client = mockClient(' Book_Hotel, book_flight ,, BOOK_HOTEL ,buy_data');
+			await expect(fetchAllowedTasks(client, 'agent-01.user.eth')).resolves.toEqual([
+				'book_hotel',
+				'book_flight',
+				'buy_data'
+			]);
+		});
+
+		it('returns an empty array when the record is unset', async () => {
+			await expect(fetchAllowedTasks(mockClient(null), 'agent-01.user.eth')).resolves.toEqual([]);
+		});
+	});
+
 	it('does not collide with max_budget when both are present', async () => {
 		const client = mockClientByKey({
 			[ENS_TEXT_KEYS.MAX_BUDGET]: '0.1',
@@ -141,10 +157,11 @@ describe('fetchAllowedTask', () => {
 });
 
 describe('loadAgentPolicy', () => {
-	it('aggregates both records into a typed policy with the normalized name', async () => {
+	it('aggregates all records into a typed policy with the normalized name', async () => {
 		const client = mockClientByKey({
 			[ENS_TEXT_KEYS.MAX_BUDGET]: '0.05',
-			[ENS_TEXT_KEYS.ALLOWED_TASK]: 'scraping'
+			[ENS_TEXT_KEYS.ESCALATION_THRESHOLD]: '0.01',
+			[ENS_TEXT_KEYS.ALLOWED_TASK]: 'book_hotel,book_flight'
 		});
 
 		const policy = await loadAgentPolicy(client, 'Agent-01.User.eth');
@@ -152,11 +169,12 @@ describe('loadAgentPolicy', () => {
 		expect(policy).toEqual({
 			name: 'agent-01.user.eth',
 			maxBudget: parseEther('0.05'),
-			allowedTask: 'scraping'
+			escalationThreshold: parseEther('0.01'),
+			allowedTasks: ['book_hotel', 'book_flight']
 		});
 	});
 
-	it('returns null fields when records are unset (caller escalates)', async () => {
+	it('returns null/empty fields when records are unset (caller escalates)', async () => {
 		const client = mockClient(null);
 
 		const policy = await loadAgentPolicy(client, 'agent-01.user.eth');
@@ -164,18 +182,19 @@ describe('loadAgentPolicy', () => {
 		expect(policy).toEqual({
 			name: 'agent-01.user.eth',
 			maxBudget: null,
-			allowedTask: null
+			escalationThreshold: null,
+			allowedTasks: []
 		});
 	});
 
-	it('propagates InvalidEnsBudgetError when the budget record is malformed', async () => {
+	it('propagates InvalidEnsAmountError when an amount record is malformed', async () => {
 		const client = mockClientByKey({
 			[ENS_TEXT_KEYS.MAX_BUDGET]: 'banana',
 			[ENS_TEXT_KEYS.ALLOWED_TASK]: 'scraping'
 		});
 
 		await expect(loadAgentPolicy(client, 'agent-01.user.eth')).rejects.toBeInstanceOf(
-			InvalidEnsBudgetError
+			InvalidEnsAmountError
 		);
 	});
 });

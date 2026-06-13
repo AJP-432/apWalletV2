@@ -7,7 +7,8 @@ import type { AgentPolicy } from '../utils/ens';
 const policy = (overrides: Partial<AgentPolicy> = {}): AgentPolicy => ({
 	name: 'agent-01.user.eth',
 	maxBudget: parseEther('0.1'),
-	allowedTask: 'scraping',
+	escalationThreshold: parseEther('0.01'),
+	allowedTasks: ['scraping'],
 	...overrides
 });
 
@@ -27,8 +28,13 @@ describe('evaluateAction — autonomous (WITHIN_BUDGET)', () => {
 	});
 
 	it('matches the task type case-insensitively and ignoring surrounding space', () => {
-		const p = policy({ allowedTask: 'Scraping' });
-		expect(evaluateAction(p, action({ taskType: '  scraping ' }))).toBe('WITHIN_BUDGET');
+		const p = policy({ allowedTasks: ['scraping'] });
+		expect(evaluateAction(p, action({ taskType: '  Scraping ' }))).toBe('WITHIN_BUDGET');
+	});
+
+	it('matches any task in a multi-task allow list', () => {
+		const p = policy({ allowedTasks: ['book_hotel', 'book_flight'] });
+		expect(evaluateAction(p, action({ taskType: 'book_flight' }))).toBe('WITHIN_BUDGET');
 	});
 
 	it('allows a zero-cost allowed task under a zero budget', () => {
@@ -54,8 +60,13 @@ describe('evaluateAction — escalation (EXCEEDS_BUDGET)', () => {
 		expect(evaluateAction(policy({ maxBudget: null }), action())).toBe('EXCEEDS_BUDGET');
 	});
 
-	it('escalates (fail safe) when allowed_task is unset', () => {
-		expect(evaluateAction(policy({ allowedTask: null }), action())).toBe('EXCEEDS_BUDGET');
+	it('escalates (fail safe) when no tasks are allowed', () => {
+		expect(evaluateAction(policy({ allowedTasks: [] }), action())).toBe('EXCEEDS_BUDGET');
+	});
+
+	it('escalates a task that is not in the allow list', () => {
+		const p = policy({ allowedTasks: ['book_hotel'] });
+		expect(evaluateAction(p, action({ taskType: 'book_flight' }))).toBe('EXCEEDS_BUDGET');
 	});
 
 	it('escalates on a negative cost (invalid input never auto-approves)', () => {
