@@ -46,6 +46,32 @@ export class InvalidEnsBudgetError extends Error {
 }
 
 /**
+ * Read an arbitrary ENSIP-26 agent text record.
+ *
+ * Normalizes the name (ENSIP-15) and returns the trimmed value, or `null` when
+ * the record is unset or whitespace-only.
+ *
+ * @param client A Viem public client (or any `EnsTextReader`).
+ * @param name   The agent's ENS name, e.g. `agent-01.user.eth`.
+ * @param key    The text-record key to read.
+ */
+export async function fetchAgentRecord(
+	client: EnsTextReader,
+	name: string,
+	key: string
+): Promise<string | null> {
+	const normalized = normalize(name);
+	const raw = await client.getEnsText({ name: normalized, key });
+
+	if (raw === null || raw === undefined) {
+		return null;
+	}
+
+	const trimmed = raw.trim();
+	return trimmed === '' ? null : trimmed;
+}
+
+/**
  * Fetch and parse an agent's `max_budget` ENSIP-26 text record.
  *
  * @param client A Viem public client (or any `EnsTextReader`).
@@ -55,25 +81,33 @@ export class InvalidEnsBudgetError extends Error {
  *         non-negative amount.
  */
 export async function fetchMaxBudget(client: EnsTextReader, name: string): Promise<bigint | null> {
-	const normalized = normalize(name);
-	const raw = await client.getEnsText({ name: normalized, key: ENS_TEXT_KEYS.MAX_BUDGET });
+	const value = await fetchAgentRecord(client, name, ENS_TEXT_KEYS.MAX_BUDGET);
 
-	if (raw === null || raw === undefined || raw.trim() === '') {
+	if (value === null) {
 		return null;
 	}
-
-	const value = raw.trim();
 
 	let budgetWei: bigint;
 	try {
 		budgetWei = parseEther(value);
 	} catch {
-		throw new InvalidEnsBudgetError(name, raw);
+		throw new InvalidEnsBudgetError(name, value);
 	}
 
 	if (budgetWei < 0n) {
-		throw new InvalidEnsBudgetError(name, raw);
+		throw new InvalidEnsBudgetError(name, value);
 	}
 
 	return budgetWei;
+}
+
+/**
+ * Fetch an agent's `allowed_task` ENSIP-26 text record — the single task
+ * category the agent is permitted to perform autonomously.
+ *
+ * @returns The trimmed task category, or `null` when unset (caller MUST treat
+ *          an unset task as "escalate", never as "any task allowed").
+ */
+export async function fetchAllowedTask(client: EnsTextReader, name: string): Promise<string | null> {
+	return fetchAgentRecord(client, name, ENS_TEXT_KEYS.ALLOWED_TASK);
 }
